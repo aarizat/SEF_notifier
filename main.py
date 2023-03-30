@@ -1,8 +1,13 @@
 from dataclasses import dataclass
 import os
+from urllib.parse import urlparse, urlunparse
 
 from requests import post, get, Response
 from bs4 import BeautifulSoup
+
+
+DEFAULT_SCHEME = 'https'
+DEFAULT_NETLOC = 'cplp.sef.pt'
 
 
 @dataclass
@@ -47,6 +52,23 @@ def send_email(
     )
 
 
+def format_url(url: str) -> str:
+    url_comps = urlparse(url)
+    if url_comps.scheme and url_comps.netloc:
+        return url
+    elif url_comps.path:
+        return urlunparse(
+            (
+                DEFAULT_SCHEME,
+                DEFAULT_NETLOC,
+                url_comps.path,
+                url_comps.params,
+                url_comps.query,
+                url_comps.fragment
+            )
+        )
+
+
 if __name__ == "__main__":
     WEBSITE_URL = 'https://cplp.sef.pt/Registo.aspx'
     MAILGUN_API_KEY = os.getenv("MAILGUN_API_KEY")
@@ -57,12 +79,13 @@ if __name__ == "__main__":
 
     link = get_url(WEBSITE_URL)
     if link is not None:
+        formated_url = format_url(link)
         send_email(
             config=config,
             from_="User SEF",
             to=RECIPIENT_EMAILS.split(','),
             subject="SEF: Visto Consular Enabled!",
-            text=f"Go to {link} to start Visto Consular proccess. :)"
+            text=f"Go to {formated_url} to start Visto Consular proccess. :)"
         )
     else:
         print("Visto Consular option is not enabled yet. :(")
