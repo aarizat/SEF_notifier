@@ -3,6 +3,7 @@ import os
 from urllib.parse import urlparse, urlunparse
 
 from requests import post, get, Response
+from requests.exceptions import HTTPError
 from bs4 import BeautifulSoup
 
 
@@ -80,12 +81,20 @@ if __name__ == "__main__":
     link = get_url(WEBSITE_URL)
     if link is not None:
         formated_url = format_url(link)
-        send_email(
-            config=config,
-            from_="User SEF",
-            to=RECIPIENT_EMAILS.split(','),
-            subject="SEF: Visto Consular Enabled!",
-            text=f"Go to {formated_url} to start Visto Consular proccess. :)"
-        )
+        try:
+            response = send_email(
+                config=config,
+                from_=f"User SEF <mailgun@{MAILGUN_DOMAIN}>",
+                to=RECIPIENT_EMAILS.split(','),
+                subject="SEF: Visto Consular Enabled!",
+                text=f"Go to {formated_url} to start Visto Consular proccess. :)"
+            )
+            response.raise_for_status()
+        except HTTPError as exc:
+            print(f"Mailgun request failed: {exc}")
+        except Exception as exc:
+            print(f"An unexpected error occurred: {exc}")
+        else:
+            print("Email sent successfully!")
     else:
         print("Visto Consular option is not enabled yet. :(")
