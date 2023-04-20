@@ -1,9 +1,11 @@
 # SEF (Serviço de Estrangeiros e Fronteiras): Visto Consular
 
 ## Description
-In the new SEF website (https://cplp.sef.pt/Registo.aspx) there are currently three options for requesting a
-Visto Consular, but one of them isn't enabled yet. The enabled option is what I need. I don't like the idea of going to the website daily to see if that option is enabed. To avoid this tedious task, I decided to automate it, I created a Python Script which goes to the website and look if the option is enabled, if so, an email telling me that the option is enable is sent to me. This script is executed three times per day.
+
+The new SEF website (https://cplp.sef.pt/Registo.aspx) currently offers three options for requesting a Visto Consular, but one of them is not yet enabled. Fortunately, the enabled option is the one I require. However, checking the website daily to see if the option is available is a time-consuming task that I prefer to avoid. To simplify the process, I created a Python script that automates the task. The script checks the website three times a day and sends me an email notification if the option becomes available.
 
 ## How does it work ?
 
-The script uses the `requests` library for making a get request to https://cplp.sef.pt/Registo.aspx, then scrapes the web page using `beautifulsoup4` library, look for an HTML image tag whose src='Images/SemVisto.png' and class='img-fluid btn Botao', goes up for its parent, that's a <a> tag and grabs its `href` attribute, if this is a valid url so this means that no-visto Consular option is enabled, and finally sends an email with this link embeded to me, in order to send emails I am using MailGun library. In case there is no link enable in the website so the script only prints a message in the stdout saying that the option is not ready yet. To run the script three times daily I created a github workflow which run on a cron schedule.
+The script is designed to streamline the process of checking for the availability of a Visto Consular option on the SEF website. It utilizes the `requests` library to make a GET request to https://cplp.sef.pt/Registo.aspx and the `beautifulsoup4` library to scrape the webpage for a specific HTML image tag. If the tag is found, the script goes up to its parent <a> tag and extracts the `href` attribute. If the attribute contains a valid URL, this means that the no-Visto Consular option is enabled, and the script sends an email to me with the link embedded using the MailGun library.
+
+If the option is not enabled, the script will simply print a message to the stdout indicating that the option is not ready yet. To ensure that the script runs three times daily, I have created a GitHub workflow that executes on a cron schedule. This approach eliminates the need for manual checking and provides an efficient and automated solution.
