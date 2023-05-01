@@ -17,6 +17,14 @@ class MailgunConfig:
     domain: str
 
 
+class MailgunError(Exception):
+    """Mailgun exception occurred."""
+
+
+class UnexpectedError(Exception):
+    """Unexpected exception occurred."""
+
+
 def get_url(url) -> str | None:
     response = get(url)
     if response.status_code == 200:
@@ -41,16 +49,24 @@ def send_email(
         text: str
     ) -> Response:
 
-    return post(
-        url=f"https://api.mailgun.net/v3/{config.domain}.mailgun.org/messages",
-        auth=("api", config.api_key),
-        data={
-            "from": from_,
-            "to": to,
-            "subject": subject,
-            "text": text,
-        }
-    )
+    try:
+        response = post(
+            url=f"https://api.mailgun.net/v3/{config.domain}.mailgun.org/messages",
+            auth=("api", config.api_key),
+            data={
+                "from": from_,
+                "to": to,
+                "subject": subject,
+                "text": text,
+            }
+        )
+        response.raise_for_status()
+    except HTTPError as exc:
+        raise MailgunError from exc
+    except Exception as exc:
+        raise UnexpectedError from exc
+    else:
+        return response
 
 
 def format_url(url: str) -> str:
@@ -72,9 +88,10 @@ def format_url(url: str) -> str:
 
 if __name__ == "__main__":
     WEBSITE_URL = 'https://cplp.sef.pt/Registo.aspx'
+    RECIPIENT_EMAILS = os.getenv("RECIPIENT_EMAILS")
+
     MAILGUN_API_KEY = os.getenv("MAILGUN_API_KEY")
     MAILGUN_DOMAIN = os.getenv("MAILGUN_DOMAIN")
-    RECIPIENT_EMAILS = os.getenv("RECIPIENT_EMAILS")
 
     config = MailgunConfig(MAILGUN_API_KEY, MAILGUN_DOMAIN)
 
@@ -89,12 +106,11 @@ if __name__ == "__main__":
                 subject="SEF: Visto Consular Enabled!",
                 text=f"Go to {formated_url} to start Visto Consular proccess. :)"
             )
-            response.raise_for_status()
-        except HTTPError as exc:
-            print(f"Mailgun request failed: {exc}")
-        except Exception as exc:
-            print(f"An unexpected error occurred: {exc}")
+        except MailgunError as exc:
+            print(f"Mailgun request failed -> {exc.__cause__}")
+        except UnexpectedError as exc:
+            print(f"Unexpected error occurred -> {exc.__cause__}")
         else:
-            print("Email sent successfully!")
+            print(f"[{response.status_code}]: Email sent successfully!")
     else:
         print("Visto Consular option is not enabled yet. :(")
