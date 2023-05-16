@@ -73,7 +73,7 @@ def format_url(url: str) -> str:
     url_comps = urlparse(url)
     if url_comps.scheme and url_comps.netloc:
         return url
-    elif url_comps.path:
+    else:
         return urlunparse(
             (
                 DEFAULT_SCHEME,
