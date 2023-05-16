@@ -38,5 +38,8 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
 
+      - name: print wd
+        run: pwd
+
       - name: Run binary
         run: ./sef-notifier-rs/sef-notifier
