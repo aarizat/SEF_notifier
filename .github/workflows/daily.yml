@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  run:
+  run-python:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -30,3 +30,13 @@ jobs:
 
       - name: Run script
         run: python main.py
+
+  run-rust:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Run binary
+        run: ./sef-notifier-rs/sef-notifier
