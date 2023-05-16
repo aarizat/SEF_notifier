@@ -38,10 +38,5 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
 
-      - name: print wd/ls
-        run: |
-          pwd
-          ls
-
       - name: Run binary
-        run: ./sef-notifier-rs/sef-notifier
+        run: ./sef-notifier-rs/sef-notifier-rs
